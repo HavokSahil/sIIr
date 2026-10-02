@@ -24,7 +24,7 @@ class SpectralFlatness extends StatefulWidget {
 
 class _SpectralFlatnessState extends State<SpectralFlatness> {
   static const int listSize = 1024;
-  double _maxY = 1;
+  final double _maxY = 1;
   double _minX = 0.0;
   double _maxX = listSize.toDouble();
   final double _dragSensitivity = 1.0;

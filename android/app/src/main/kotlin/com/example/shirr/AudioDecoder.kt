@@ -26,14 +26,20 @@ class AudioConverter(private val context: Context) {
 
         extractor.selectTrack(audioTrackIndex)
         val format = extractor.getTrackFormat(audioTrackIndex)
+        if (format.containsKey(MediaFormat.KEY_DURATION) &&
+            format.getLong(MediaFormat.KEY_DURATION) > 480_000_000L) {
+            extractor.release()
+            throw IllegalArgumentException("Choose a recording up to eight minutes")
+        }
         val mime = format.getString(MediaFormat.KEY_MIME)!!
-        val sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
-        val channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+        var sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
+        var channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
         val pcmEncoding = AudioFormat.ENCODING_PCM_16BIT
 
         println("🎧 Selected audio track with mime=$mime, sampleRate=$sampleRate, channels=$channels")
 
         val codec = MediaCodec.createDecoderByType(mime)
+        format.setInteger(MediaFormat.KEY_PCM_ENCODING, pcmEncoding)
         codec.configure(format, null, null, 0)
         codec.start()
 
@@ -46,51 +52,70 @@ class AudioConverter(private val context: Context) {
         println("📝 Wrote placeholder WAV header")
 
         val bufferInfo = MediaCodec.BufferInfo()
-        var eos = false
+        var inputEos = false
+        var outputEos = false
         var totalPcmBytes = 0
         var totalFrames = 0
 
-        while (!eos) {
-            val inputBufferIndex = codec.dequeueInputBuffer(10000)
-            if (inputBufferIndex >= 0) {
-                val inputBuffer = codec.getInputBuffer(inputBufferIndex)!!
-                val sampleSize = extractor.readSampleData(inputBuffer, 0)
+        try {
+            while (!outputEos) {
+                val inputBufferIndex = if (inputEos) -1 else codec.dequeueInputBuffer(10000)
+                if (inputBufferIndex >= 0) {
+                    val inputBuffer = codec.getInputBuffer(inputBufferIndex)!!
+                    val sampleSize = extractor.readSampleData(inputBuffer, 0)
 
-                if (sampleSize < 0) {
-                    println("📭 End of stream")
-                    codec.queueInputBuffer(inputBufferIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
-                    eos = true
-                } else {
-                    val presentationTimeUs = extractor.sampleTime
-                    codec.queueInputBuffer(inputBufferIndex, 0, sampleSize, presentationTimeUs, 0)
-                    extractor.advance()
+                    if (sampleSize < 0) {
+                        println("📭 End of stream")
+                        codec.queueInputBuffer(inputBufferIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                        inputEos = true
+                    } else {
+                        val presentationTimeUs = extractor.sampleTime
+                        codec.queueInputBuffer(inputBufferIndex, 0, sampleSize, presentationTimeUs, 0)
+                        extractor.advance()
+                    }
+                }
+
+                val outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 10000)
+                if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                    val decodedFormat = codec.outputFormat
+                    sampleRate = decodedFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)
+                    channels = decodedFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+                    if (decodedFormat.containsKey(MediaFormat.KEY_PCM_ENCODING) &&
+                        decodedFormat.getInteger(MediaFormat.KEY_PCM_ENCODING) != AudioFormat.ENCODING_PCM_16BIT) {
+                        throw IllegalStateException("Decoder did not produce 16-bit PCM")
+                    }
+                }
+                if (outputBufferIndex >= 0) {
+                    val outputBuffer = codec.getOutputBuffer(outputBufferIndex)!!
+                    val pcmData = ByteArray(bufferInfo.size)
+                    outputBuffer.position(bufferInfo.offset)
+                    outputBuffer.limit(bufferInfo.offset + bufferInfo.size)
+                    outputBuffer.get(pcmData)
+                    outputBuffer.clear()
+
+                    wavOut.write(pcmData)
+                    totalPcmBytes += pcmData.size
+                    if (totalPcmBytes.toLong() > sampleRate.toLong() * channels * 2 * 480) {
+                        throw IllegalArgumentException("Decoded audio exceeds eight minutes")
+                    }
+                    totalFrames++
+                    outputEos = (bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
+                    codec.releaseOutputBuffer(outputBufferIndex, false)
+
+                    if (totalFrames % 100 == 0) {
+                        println("📦 Processed $totalFrames frames, ${totalPcmBytes / 1024} KB written")
+                    }
                 }
             }
 
-            val outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 10000)
-            if (outputBufferIndex >= 0) {
-                val outputBuffer = codec.getOutputBuffer(outputBufferIndex)!!
-                val pcmData = ByteArray(bufferInfo.size)
-                outputBuffer.get(pcmData)
-                outputBuffer.clear()
-
-                wavOut.write(pcmData)
-                totalPcmBytes += pcmData.size
-                totalFrames++
-                codec.releaseOutputBuffer(outputBufferIndex, false)
-
-                if (totalFrames % 100 == 0) {
-                    println("📦 Processed $totalFrames frames, ${totalPcmBytes / 1024} KB written")
-                }
+            wavOut.flush()
+        } finally {
+            try { codec.stop() } finally {
+                codec.release()
+                extractor.release()
+                wavOut.close()
             }
         }
-
-        codec.stop()
-        codec.release()
-        extractor.release()
-
-        wavOut.flush()
-        wavOut.close()
         println("✅ Finished writing PCM data: ${totalPcmBytes} bytes")
 
         // Fix header with accurate sizes

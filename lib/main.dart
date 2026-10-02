@@ -1,13 +1,10 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:shirr/screens/main_menu/main_menu_screen.dart';
-import 'package:shirr/screens/audio_analyzer/audio_analyzer_screen.dart';
 import 'package:shirr/screens/audio_generator/audio_generator_screen.dart';
 import 'package:shirr/screens/audio_visualizer/audio_visualizer_screen.dart';
 import './core/constants.dart';
 import './core/theme.dart';
-import 'screens/intro/intro_screen.dart';
+import 'workbench/workbench_screen.dart';
 
 void main() {
   return runApp(MyApp());
@@ -23,12 +20,11 @@ class MyApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.system,
-      initialRoute: '/',
+      initialRoute: Constants.routeMainMenu,
       debugShowCheckedModeBanner: false,
       routes: {
-        Constants.routeLoadingAnim: (context) => SplashScreen(),
         Constants.routeMainMenu: (context) => MainMenuScreen(),
-        Constants.routeAudioAnalyzer: (context) => AudioAnalyzerScreen(),
+        Constants.routeAudioAnalyzer: (context) => const WorkbenchScreen(),
         Constants.routeAudioGenerator: (context) => AudioGeneratorScreen(),
         Constants.routeAudioVisualizer: (context) => AudioVisualizerScreen(),
       },

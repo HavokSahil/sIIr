@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fftea/fftea.dart';
 import 'package:shirr/core/constants.dart';
-import 'package:shirr/services/mic_controller.dart';
 
 class PhaseCircleCard extends StatefulWidget {
   final Stream<List<double>> pcmBuffer;

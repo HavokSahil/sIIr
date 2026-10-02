@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shirr/core/constants.dart';
 import 'package:shirr/screens/audio_analyzer/plots/amp_plot_card.dart';
 import 'package:shirr/screens/audio_analyzer/plots/const_q_tf_card.dart';
 import 'package:shirr/screens/audio_analyzer/plots/fft_plot_card.dart';
@@ -27,26 +26,6 @@ class PlotPageView extends StatelessWidget {
   final PageController pageController;
   final bool isInteractive;
   final int sampleRate;
-
-    Widget _buildPlotCard(String title, bool isDark) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 6,
-      color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF0F0F0),
-      child: Center(
-        child: Text(
-          title,
-          style: TextStyle(
-            fontFamily: Constants.fontFamilySubHead,
-            color:Color(0xFFD5D5D5),
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

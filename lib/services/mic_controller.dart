@@ -9,8 +9,9 @@ class MicController {
   final requiredPermission = Permission.microphone;
 
   final AudioStreamer _audioStreamer = AudioStreamer();
-  late StreamSubscription<List<double>> _streamSubscription;
-  final StreamController<List<double>> _streamController = StreamController.broadcast();
+  StreamSubscription<List<double>>? _streamSubscription;
+  final StreamController<List<double>> _streamController =
+      StreamController.broadcast();
 
   bool _isListening = false;
 
@@ -35,7 +36,9 @@ class MicController {
       bool allowed = await _isActionPermitted();
       if (!allowed) return;
 
-      _streamSubscription = _audioStreamer.audioStream.listen((List<double> buffer) {
+      _streamSubscription = _audioStreamer.audioStream.listen((
+        List<double> buffer,
+      ) {
         _streamController.add(buffer); // Forward audio data to streamController
       });
 
@@ -45,7 +48,7 @@ class MicController {
 
   Future<void> stop() async {
     if (_isListening) {
-      await _streamSubscription.cancel();
+      await _streamSubscription?.cancel();
       _isListening = false;
     }
   }
@@ -54,15 +57,16 @@ class MicController {
 
   Future<int> getSampleRate() async => _audioStreamer.actualSampleRate;
 
-  Future<bool> setSampleRate(int sampleRate) async {
+  Future<void> setSampleRate(int sampleRate) async {
+    // The native recorder exists only after the stream starts. Its actual
+    // sample rate is read when the first audio buffer arrives.
     _audioStreamer.sampleRate = sampleRate;
-    return (await _audioStreamer.actualSampleRate) == sampleRate;
   }
 
   bool isListening() => _isListening;
 
   void dispose() {
-    _streamSubscription.cancel();
+    _streamSubscription?.cancel();
     _streamController.close();
   }
 }

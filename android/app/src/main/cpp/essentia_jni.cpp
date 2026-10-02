@@ -1,91 +1,33 @@
 #include <jni.h>
-#include "essentia/algorithmfactory.h"
-#include "essentia/essentiamath.h"
-#include <vector>
 
-using namespace essentia;
+// The version symbol is exported by libessentia. These placeholder methods
+// need no algorithm headers (or their optional Eigen tensor dependencies).
+namespace essentia {
+extern const char* version;
+}
 
 extern "C" {
 
-    // Function to get the Essentia version
-    JNIEXPORT jstring JNICALL
-    Java_com_example_shirr_MainActivity_getEssentiaVersion(JNIEnv* env, jobject /* this */) {
-        std::string version = essentia::version;
-        return env->NewStringUTF(version.c_str());
-    }
+JNIEXPORT jstring JNICALL
+Java_com_example_shirr_MainActivity_getEssentiaVersion(JNIEnv* env, jclass) {
+    return env->NewStringUTF(essentia::version);
+}
 
-    // Function for Beat Detection
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_example_shirr_MainActivity_detectBeats(JNIEnv* env, jobject /* this */, jfloatArray audioBuffer, jint sampleRate) {
-        // Convert the Java float array to C++ vector
-        jsize bufferSize = env->GetArrayLength(audioBuffer);
-        jfloat* audioData = env->GetFloatArrayElements(audioBuffer, nullptr);
-        std::vector<float> audioVec(audioData, audioData + bufferSize);
+// Detection remains unimplemented. The Flutter observatory uses its Dart DSP
+// engine. Do not acquire/pin Java audio arrays just to return an empty result.
+JNIEXPORT jfloatArray JNICALL
+Java_com_example_shirr_MainActivity_detectBeats(JNIEnv* env, jclass, jfloatArray, jint) {
+    return env->NewFloatArray(0);
+}
 
-        // Create the algorithm for beat tracking
-        // BeatTrackerMulti beatTracker;
-        std::vector<float> beats;
-        
-        // Process audio buffer
-        // beatTracker.compute(audioVec, sampleRate, beats);
+JNIEXPORT jfloatArray JNICALL
+Java_com_example_shirr_MainActivity_detectOnsets(JNIEnv* env, jclass, jfloatArray, jint) {
+    return env->NewFloatArray(0);
+}
 
-        // Convert the C++ vector back to a Java float array
-        jfloatArray result = env->NewFloatArray(beats.size());
-        // env->SetFloatArrayRegion(result, 0, beats.size(), beats.data());
+JNIEXPORT jfloatArray JNICALL
+Java_com_example_shirr_MainActivity_detectPitch(JNIEnv* env, jclass, jfloatArray, jint) {
+    return env->NewFloatArray(0);
+}
 
-        // // Release resources
-        // env->ReleaseFloatArrayElements(audioBuffer, audioData, JNI_ABORT);
-
-        return result;
-    }
-
-    // Function for Onset Detection
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_example_shirr_MainActivity_detectOnsets(JNIEnv* env, jobject /* this */, jfloatArray audioBuffer, jint sampleRate) {
-        // Convert the Java float array to C++ vector
-        jsize bufferSize = env->GetArrayLength(audioBuffer);
-        jfloat* audioData = env->GetFloatArrayElements(audioBuffer, nullptr);
-        std::vector<float> audioVec(audioData, audioData + bufferSize);
-
-        // Create the algorithm for onset detection
-        // OnsetDetection onsetDetection("energy");
-        std::vector<float> onsets;
-
-        // Process audio buffer
-        // onsetDetection.compute(audioVec, sampleRate, onsets);
-
-        // Convert the C++ vector back to a Java float array
-        jfloatArray result = env->NewFloatArray(onsets.size());
-        // env->SetFloatArrayRegion(result, 0, onsets.size(), onsets.data());
-
-        // Release resources
-        env->ReleaseFloatArrayElements(audioBuffer, audioData, JNI_ABORT);
-
-        return result;
-    }
-
-    // Function for Pitch Detection
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_example_shirr_MainActivity_detectPitch(JNIEnv* env, jobject /* this */, jfloatArray audioBuffer, jint sampleRate) {
-        // Convert the Java float array to C++ vector
-        jsize bufferSize = env->GetArrayLength(audioBuffer);
-        jfloat* audioData = env->GetFloatArrayElements(audioBuffer, nullptr);
-        std::vector<float> audioVec(audioData, audioData + bufferSize);
-
-        // Create the algorithm for pitch detection
-        // PitchYin pitchYin;
-        std::vector<float> pitches;
-
-        // Process audio buffer
-        // pitchYin.compute(audioVec, sampleRate, pitches);
-
-        // Convert the C++ vector back to a Java float array
-        jfloatArray result = env->NewFloatArray(pitches.size());
-        env->SetFloatArrayRegion(result, 0, pitches.size(), pitches.data());
-
-        // Release resources
-        env->ReleaseFloatArrayElements(audioBuffer, audioData, JNI_ABORT);
-
-        return result;
-    }
 }

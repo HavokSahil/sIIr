@@ -268,7 +268,7 @@ void onPressHelp(BuildContext context) {
                   Padding(
                     padding: EdgeInsets.all(10),
                     child: Text(
-                      "Since there are two modes of getting streams in Shirr, i.e., Microphone and Audio File. Pressing `Mic` sets the stream to microphone.",
+                      "Since there are two modes of getting streams in sIIr, i.e., Microphone and Audio File. Pressing `Mic` sets the stream to microphone.",
                       style: textStyle,
                       textAlign: TextAlign.center,
                       ),
