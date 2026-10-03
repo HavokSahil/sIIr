@@ -4,9 +4,9 @@
   <h1>sIIr</h1>
   <p>A music observatory for the curious.</p>
 
-  <a href="https://github.com/HavokSahil/sIIr/releases/latest">Download Android APK</a>
+  <a href="https://github.com/sIIrsuite/sIIr/releases/latest">Download Android APK</a>
   ·
-  <a href="https://github.com/HavokSahil/sIIr/actions">Builds</a>
+  <a href="https://github.com/sIIrsuite/sIIr/actions">Builds</a>
 </div>
 
 ---
@@ -27,7 +27,7 @@ Follow the playback cursor, zoom into plots, mark moments and open **Maths** for
 
 ## Install
 
-Download `sIIr-android.apk` from the [latest release](https://github.com/HavokSahil/sIIr/releases/latest). Requires **Android 7.0+**.
+Download `sIIr-android.apk` from the [latest release](https://github.com/sIIrsuite/sIIr/releases/latest). Requires **Android 7.0+**.
 
 APKs currently use development signing. Switching between local and CI builds may require uninstalling the previous version.
 

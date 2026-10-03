@@ -1,0 +1,9 @@
+A music observatory for the curious.
+
+Analyze live microphone input or local audio files with spectrograms, native ECQT pitch classes, beat tracking, spectral descriptors, correlation and PCA. Follow playback, zoom into fullscreen plots and mark moments.
+
+Visualize music with colorful, touch-reactive ink. Generate music from cellular automata: edit seeds, rules, scales and tempo, then play, loop or export WAV.
+
+Maths panels explain the intuition and formulas behind the tools. Audio and analysis stay on your device.
+
+Fluid motion remains experimental. Beat tracking uses spectral flux; calibrated zero device latency is not claimed.

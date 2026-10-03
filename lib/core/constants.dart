@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Constants {
   static String appName = "sIIr";
-  static String version = "1.1.0";
+  static String version = "1.1.1";
   static String copyrightText = "© 2026 Sahil Raj";
   static String pathCircleDarkTop = "assets/images/gif/circle_dark_top.svg";
   static String pathCircleDarkMid = "assets/images/gif/circle_dark_mid.svg";

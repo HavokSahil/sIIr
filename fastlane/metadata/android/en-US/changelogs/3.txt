@@ -1,0 +1,7 @@
+Prepare sIIr for F-Droid packaging:
+- Permanent Android application ID: io.siirsuite.siir.
+- Remove unused native binaries, placeholder Essentia bridge and model.
+- Compile native ECQT from source.
+- Add store metadata and font license notices.
+
+This app installs separately from sIIr 1.1.0.
